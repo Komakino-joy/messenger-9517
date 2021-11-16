@@ -4,6 +4,7 @@ import {
   gotConversations,
   addConversation,
   setSearchedUsers,
+  gotUpdatedConversation,
 } from "../conversations";
 import { gotUser, setFetchingStatus } from "../user";
 
@@ -71,7 +72,17 @@ export const logout = (id) => async (dispatch) => {
 export const fetchConversations = () => async (dispatch) => {
   try {
     const { data } = await axios.get("/api/conversations");
-    dispatch(gotConversations(data));
+    
+    // Mapping through the data object to find all unread messages 
+    // and adding the data field "unreadMessages" to each conversation.
+    const transformedData = await data.map(conversation => (
+        { ...conversation , unreadMessages: conversation.messages.reduce((acc, message) => 
+          message.senderId === conversation.otherUser.id && message.status === 'unread' ? acc + 1 : acc, 0
+        )}
+      )
+    );
+
+    dispatch(gotConversations(transformedData));
   } catch (error) {
     console.error(error);
   }
@@ -116,4 +127,36 @@ export const searchUsers = (searchTerm) => async (dispatch) => {
   } catch (error) {
     console.error(error);
   }
+};
+
+export const readMessages = (body) => async (dispatch) =>{
+  try {
+    await axios.post("/api/messages/read-all", body);
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+export const fetchUpdatedConvo = (conversation) => async (dispatch) => {
+
+  try {
+    const { data } = await axios.post("api/conversations/updated", {id: conversation.id});
+
+    let unreadMessages = await data.messages.reduce((acc, message) => 
+          message.senderId === data.otherUser.id && message.status === 'unread' ? acc + 1 : acc, 0
+        )
+
+    let transformedData = {
+      ...data, 
+      unreadMessages, 
+    } 
+
+    if (conversation.message) {
+      transformedData.latestMessageText = conversation.message.text;
+    }
+
+    dispatch(gotUpdatedConversation({conversation: transformedData, conversationId: data.id}));
+  } catch (error) {
+    console.error(error);
+  } 
 };

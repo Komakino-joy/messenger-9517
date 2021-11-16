@@ -42,7 +42,7 @@ const ChatContent = (props) => {
       </Box>
         <Badge 
           className={classes.badge} 
-          badgeContent={12} 
+          badgeContent={conversation.unreadMessages} 
           color="primary"
           max={99}
         />
