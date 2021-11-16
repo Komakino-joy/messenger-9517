@@ -10,8 +10,8 @@ const Message = db.define("message", {
     type: Sequelize.INTEGER,
     allowNull: false,
   },
-  status: {
-    type: Sequelize.STRING,
+  read: {
+    type: Sequelize.BOOLEAN,
     allowNull: false,
   },
 });

@@ -15,7 +15,7 @@ router.post("/", async (req, res, next) => {
 
     // if we already know conversation id, we can save time and just add it to message and return
     if (conversationId) {
-      const message = await Message.create({ senderId, text, conversationId, status: 'unread' });
+      const message = await Message.create({ senderId, text, conversationId, read: false });
       return res.json({ message, sender });
     }
     // if we don't have conversation id, find a conversation to make sure it doesn't already exist
@@ -38,7 +38,7 @@ router.post("/", async (req, res, next) => {
       senderId,
       text,
       conversationId: conversation.id,
-      status: 'unread',
+      read: false,
     });
     res.json({ message, sender });
   } catch (error) {
@@ -55,7 +55,7 @@ router.post("/read-all", async (req, res, next) => {
       return res.sendStatus(204);
     }
 
-    await Message.update({ status: 'read'}, {
+    await Message.update({ read: true}, {
       where: {
         conversationId: conversation.id,
         senderId: conversation.otherUser.id,

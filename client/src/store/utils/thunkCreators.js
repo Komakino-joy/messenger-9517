@@ -77,7 +77,7 @@ export const fetchConversations = () => async (dispatch) => {
     // and adding the data field "unreadMessages" to each conversation.
     const transformedData = await data.map(conversation => (
         { ...conversation , unreadMessages: conversation.messages.reduce((acc, message) => 
-          message.senderId === conversation.otherUser.id && message.status === 'unread' ? acc + 1 : acc, 0
+          message.senderId === conversation.otherUser.id && message.read === false ? acc + 1 : acc, 0
         )}
       )
     );
@@ -143,7 +143,7 @@ export const fetchUpdatedConvo = (conversation) => async (dispatch) => {
     const { data } = await axios.post("api/conversations/updated", {id: conversation.id});
 
     let unreadMessages = await data.messages.reduce((acc, message) => 
-          message.senderId === data.otherUser.id && message.status === 'unread' ? acc + 1 : acc, 0
+          message.senderId === data.otherUser.id && message.read === false ? acc + 1 : acc, 0
         )
 
     let transformedData = {
