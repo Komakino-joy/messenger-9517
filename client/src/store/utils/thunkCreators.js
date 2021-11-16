@@ -3,7 +3,6 @@ import socket from "../../socket";
 import {
   gotConversations,
   addConversation,
-  setNewMessage,
   setSearchedUsers,
 } from "../conversations";
 import { gotUser, setFetchingStatus } from "../user";
@@ -85,7 +84,7 @@ const saveMessage = async (body) => {
 
 const sendMessage = (data, body) => {
 
-  socket.emit("add-new-message", {
+  socket.emit("new-message", {
     message:  data.message,
     recipientId:  body.recipientId,
     sender:  data.sender,
@@ -102,10 +101,9 @@ export const postMessage =  (body) => async(dispatch) => {
     if (!body.conversationId) {
       dispatch(addConversation(body.recipientId, data.message));
     } else {
-      dispatch(setNewMessage(data.message, data.sender));
+      sendMessage(data, body);
     }
-
-    sendMessage(data, body);
+    
   } catch (error) {
     console.error(error);
   }
