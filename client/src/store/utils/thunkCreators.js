@@ -4,6 +4,7 @@ import {
   gotConversations,
   addConversation,
   setSearchedUsers,
+  setNewMessage
 } from "../conversations";
 import { gotUser, setFetchingStatus } from "../user";
 
@@ -101,9 +102,11 @@ export const postMessage =  (body) => async(dispatch) => {
     if (!body.conversationId) {
       dispatch(addConversation(body.recipientId, data.message));
     } else {
-      sendMessage(data, body);
+      dispatch(setNewMessage(data.message));
     }
     
+    sendMessage(data, body);
+
   } catch (error) {
     console.error(error);
   }

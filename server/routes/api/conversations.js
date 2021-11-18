@@ -19,9 +19,13 @@ router.get("/", async (req, res, next) => {
         },
       },
       attributes: ["id"],
-      order: [[Message, "createdAt"]],
+      order: [
+        [Message, "createdAt", "DESC"],
+      ],
       include: [
-        { model: Message, order: ["createdAt"] },
+        { 
+          model: Message,
+        },
         {
           model: User,
           as: "user1",
@@ -51,6 +55,8 @@ router.get("/", async (req, res, next) => {
       const convo = conversations[i];
       const convoJSON = convo.toJSON();
 
+      convoJSON.messages =  conversations[i].messages.reverse()
+
       // set a property "otherUser" so that frontend will have easier access
       if (convoJSON.user1) {
         convoJSON.otherUser = convoJSON.user1;
@@ -69,6 +75,7 @@ router.get("/", async (req, res, next) => {
 
       // set properties for notification count and latest message preview
       convoJSON.latestMessageText = convoJSON.messages[0].text;
+
       conversations[i] = convoJSON;
     }
 
