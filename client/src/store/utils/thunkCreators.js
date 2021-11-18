@@ -4,7 +4,7 @@ import {
   gotConversations,
   addConversation,
   setSearchedUsers,
-  gotUpdatedConversation,
+  setNewMessage,
 } from "../conversations";
 import { gotUser, setFetchingStatus } from "../user";
 
@@ -73,12 +73,14 @@ export const fetchConversations = () => async (dispatch) => {
   try {
     const { data } = await axios.get("/api/conversations");
     
-    // Mapping through the data object to find all unread messages 
-    // and adding the data field "unreadMessages" to each conversation.
     const transformedData = await data.map(conversation => (
-        { ...conversation , unreadMessages: conversation.messages.reduce((acc, message) => 
-          message.senderId === conversation.otherUser.id && message.read === false ? acc + 1 : acc, 0
-        )}
+        { ...conversation , 
+          unreadMessages: conversation.messages.reduce((acc, message) => 
+            message.senderId === conversation.otherUser.id && message.read === false ? acc + 1 : acc, 0
+          ),
+          lastRead: conversation.messages.slice().reverse().find(message => 
+            message.read === true && message.senderId !== conversation.otherUser.id),
+        }
       )
     );
 
@@ -112,9 +114,10 @@ export const postMessage =  (body) => async(dispatch) => {
     if (!body.conversationId) {
       dispatch(addConversation(body.recipientId, data.message));
     } else {
-      sendMessage(data, body);
+      dispatch(setNewMessage(data.message));
     }
     
+    sendMessage(data, body);
   } catch (error) {
     console.error(error);
   }
@@ -131,32 +134,9 @@ export const searchUsers = (searchTerm) => async (dispatch) => {
 
 export const readMessages = (body) => async (dispatch) =>{
   try {
-    await axios.post("/api/messages/read-all", body);
+    await axios.put("/api/messages/read-status", body);
+    dispatch(fetchConversations())
   } catch (error) {
     console.error(error);
   }
-};
-
-export const fetchUpdatedConvo = (conversation) => async (dispatch) => {
-
-  try {
-    const { data } = await axios.post("api/conversations/updated", {id: conversation.id});
-
-    let unreadMessages = await data.messages.reduce((acc, message) => 
-          message.senderId === data.otherUser.id && message.read === false ? acc + 1 : acc, 0
-        )
-
-    let transformedData = {
-      ...data, 
-      unreadMessages, 
-    } 
-
-    if (conversation.message) {
-      transformedData.latestMessageText = conversation.message.text;
-    }
-
-    dispatch(gotUpdatedConversation({conversation: transformedData, conversationId: data.id}));
-  } catch (error) {
-    console.error(error);
-  } 
 };

@@ -21,6 +21,12 @@ const useStyles = makeStyles((theme) => ({
   },
   badge: {
     marginRight: "20px",
+  },
+  bold: {
+    fontWeight: 600,
+    fontSize: 12,
+    color: "#000",
+    letterSpacing: -0.17,
   }
 }));
 
@@ -28,7 +34,7 @@ const ChatContent = (props) => {
   const classes = useStyles();
 
   const { conversation } = props;
-  const { latestMessageText, otherUser } = conversation;
+  const { latestMessageText, otherUser, unreadMessages } = conversation;
 
   return (
     <Box className={classes.root}>
@@ -36,8 +42,8 @@ const ChatContent = (props) => {
         <Typography className={classes.username}>
           {otherUser.username}
         </Typography>
-        <Typography className={classes.previewText}>
-          {latestMessageText}
+        <Typography className={`${unreadMessages > 0 ? classes.bold : classes.previewText}`} >
+          {latestMessageText} 
         </Typography>
       </Box>
         <Badge 

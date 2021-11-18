@@ -6,7 +6,7 @@ import {
   addOnlineUser,
 } from "./store/conversations";
 
-import { fetchUpdatedConvo } from "./store/utils/thunkCreators";
+import { fetchConversations } from "./store/utils/thunkCreators";
 
 const socket = io(window.location.origin);
 
@@ -23,7 +23,7 @@ socket.on("connect", () => {
   
   socket.on("new-message", (data) => {
     store.dispatch(setNewMessage(data.message, data.sender));
-    store.dispatch(fetchUpdatedConvo({id: data.message.conversationId, message: data.message}));
+    store.dispatch(fetchConversations());
   });
 });
 
