@@ -6,6 +6,11 @@ import {
   addOnlineUser,
 } from "./store/conversations";
 
+import { 
+  fetchConversations,
+  readMessages 
+} from "./store/utils/thunkCreators";
+
 const socket = io(window.location.origin);
 
 socket.on("connect", () => {
@@ -21,6 +26,11 @@ socket.on("connect", () => {
   
   socket.on("new-message", (data) => {
     store.dispatch(setNewMessage(data.message, data.sender));
+    store.dispatch(fetchConversations());
+  });
+
+  socket.on("open-convo", (data) => {
+    store.dispatch(readMessages(data))
   });
 });
 

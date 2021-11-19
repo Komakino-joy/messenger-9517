@@ -19,13 +19,10 @@ router.get("/", async (req, res, next) => {
         },
       },
       attributes: ["id"],
-      order: [
-        [Message, "createdAt", "DESC"],
-      ],
+
+      order: [[Message, "createdAt", "DESC"]],
       include: [
-        { 
-          model: Message,
-        },
+        { model: Message },
         {
           model: User,
           as: "user1",
@@ -80,6 +77,33 @@ router.get("/", async (req, res, next) => {
     }
 
     res.json(conversations);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post("/fetch-single-convo", async (req, res, next) => {
+  try {
+    const { conversation } = req.body;
+    
+    if (!req.user) {
+      return res.sendStatus(401);
+    }
+
+    const specifiedConvo = await Conversation.findOne({
+      where: { id: conversation.id },
+      order: [[Message, "createdAt", "ASC"]],
+      attributes: ["id"],
+      include: [
+        { model: Message },
+      ]
+    })
+
+    const specifiedConvoJSON = specifiedConvo.toJSON();
+    specifiedConvoJSON.latestMessageText = conversation.latestMessageText;
+    specifiedConvoJSON.otherUser = conversation.otherUser;
+
+    res.json(specifiedConvoJSON);
   } catch (error) {
     next(error);
   }

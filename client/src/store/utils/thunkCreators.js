@@ -2,9 +2,11 @@ import axios from "axios";
 import socket from "../../socket";
 import {
   gotConversations,
+  gotSpecifiedConversation,
   addConversation,
   setSearchedUsers,
-  setNewMessage
+  setNewMessage,
+
 } from "../conversations";
 import { gotUser, setFetchingStatus } from "../user";
 
@@ -72,7 +74,19 @@ export const logout = (id) => async (dispatch) => {
 export const fetchConversations = () => async (dispatch) => {
   try {
     const { data } = await axios.get("/api/conversations");
-    dispatch(gotConversations(data));
+    
+    const transformedData = await data.map(conversation => (
+        { ...conversation , 
+          unreadMessages: conversation.messages.reduce((acc, message) => 
+            message.senderId === conversation.otherUser.id && message.read === false ? acc + 1 : acc, 0
+          ),
+          lastRead: conversation.messages.slice().reverse().find(message => 
+            message.read === true && message.senderId !== conversation.otherUser.id),
+        }
+      )
+    );
+
+    dispatch(gotConversations(transformedData));
   } catch (error) {
     console.error(error);
   }
@@ -106,7 +120,6 @@ export const postMessage =  (body) => async(dispatch) => {
     }
     
     sendMessage(data, body);
-
   } catch (error) {
     console.error(error);
   }
@@ -119,4 +132,41 @@ export const searchUsers = (searchTerm) => async (dispatch) => {
   } catch (error) {
     console.error(error);
   }
+};
+
+export const readMessages = (body) => async (dispatch) =>{
+  try {
+    await axios.put("/api/messages/read-status", body);
+
+    dispatch(fetchSpecifiedConversation(body.conversation))
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+export const fetchSpecifiedConversation = (conversation) => async (dispatch) => {
+  try {
+    const { data } = await axios.post("/api/conversations/fetch-single-convo", {conversation});
+
+    const transformedData = 
+        { ...data , 
+          unreadMessages: data.messages.reduce((acc, message) => 
+            message.senderId === data.otherUser.id && message.read === false ? acc + 1 : acc, 0
+          ),
+          lastRead: data.messages.slice().reverse().find(message => 
+            message.read === true && message.senderId !== data.otherUser.id),
+        };
+
+    dispatch(gotSpecifiedConversation(transformedData));
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+export const openConvo = async (body) => {
+  socket.emit("open-convo", {
+    conversation: body.conversation,
+    user:body.user,
+  });
+
 };

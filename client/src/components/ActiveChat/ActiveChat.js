@@ -1,8 +1,10 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import { Box } from "@material-ui/core";
 import { Input, Header, Messages } from "./index";
 import { connect } from "react-redux";
+
+import { readMessages } from "../../store/utils/thunkCreators";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -22,8 +24,14 @@ const useStyles = makeStyles(() => ({
 
 const ActiveChat = (props) => {
   const classes = useStyles();
-  const { user } = props;
+  const { user, readMessages } = props;
   const conversation = props.conversation || {};
+
+  
+  useEffect(() => {
+    readMessages({conversation: props.conversation, user: props.user});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [props.conversation?.messages.length, ])
 
   return (
     <Box className={classes.root}>
@@ -38,6 +46,7 @@ const ActiveChat = (props) => {
               messages={conversation.messages}
               otherUser={conversation.otherUser}
               userId={user.id}
+              lastRead={conversation.lastRead}
             />
             <Input
               otherUser={conversation.otherUser}
@@ -62,4 +71,13 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps, null)(ActiveChat);
+const mapDispatchToProps = (dispatch) => {
+  return {
+    readMessages: (body) => {
+      dispatch(readMessages(body));
+    },
+  };
+};
+
+
+export default connect(mapStateToProps, mapDispatchToProps)(ActiveChat);
