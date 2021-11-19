@@ -4,7 +4,7 @@ import { BadgeAvatar, ChatContent } from "../Sidebar";
 import { makeStyles } from "@material-ui/core/styles";
 import { setActiveChat } from "../../store/activeConversation";
 import { connect } from "react-redux";
-import { readMessages, fetchConversations } from '../../store/utils/thunkCreators'
+import { readMessages } from '../../store/utils/thunkCreators'
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -22,13 +22,12 @@ const useStyles = makeStyles((theme) => ({
 
 const Chat = (props) => {
   const classes = useStyles();
-  const { conversation, readMessages, fetchConversations } = props;
+  const { conversation, readMessages } = props;
   const { otherUser } = conversation;
 
   const handleClick = async (conversation) => {
     await props.setActiveChat(conversation.otherUser.username);
     await readMessages({conversation: props.conversation, user: props.user});
-    await fetchConversations();
   };
 
   return (
@@ -44,6 +43,12 @@ const Chat = (props) => {
   );
 };
 
+const mapStateToProps = (state) => {
+  return {
+    user: state.user
+  };
+};
+
 const mapDispatchToProps = (dispatch) => {
   return {
     setActiveChat: (id) => {
@@ -52,11 +57,8 @@ const mapDispatchToProps = (dispatch) => {
     readMessages: (body) => {
       dispatch(readMessages(body));
     },
-    fetchConversations: () => {
-      dispatch(fetchConversations())
-    }
   };
 };
 
 
-export default connect(null, mapDispatchToProps)(Chat);
+export default connect(mapStateToProps, mapDispatchToProps)(Chat);
