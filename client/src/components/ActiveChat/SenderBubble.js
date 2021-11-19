@@ -43,7 +43,7 @@ const SenderBubble = (props) => {
       <Box className={classes.bubble}>
         <Typography className={classes.text}>{text}</Typography>
       </Box>
-      { read && lastRead.id === id &&
+      { read && lastRead?.id === id &&
         <Avatar alt={username} src={photoUrl} className={classes.avatar}></Avatar>
       }
     </Box>

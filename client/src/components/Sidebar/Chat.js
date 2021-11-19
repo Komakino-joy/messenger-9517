@@ -4,7 +4,7 @@ import { BadgeAvatar, ChatContent } from "../Sidebar";
 import { makeStyles } from "@material-ui/core/styles";
 import { setActiveChat } from "../../store/activeConversation";
 import { connect } from "react-redux";
-import { readMessages } from '../../store/utils/thunkCreators'
+import { openConvo, readMessages } from "../../store/utils/thunkCreators";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -27,7 +27,8 @@ const Chat = (props) => {
 
   const handleClick = async (conversation) => {
     await props.setActiveChat(conversation.otherUser.username);
-    await readMessages({conversation: props.conversation, user: props.user});
+    await readMessages({conversation: props.conversation, user: props.user})
+    await openConvo({conversation: props.conversation, user: props.user});
   };
 
   return (

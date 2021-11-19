@@ -143,7 +143,6 @@ export const readMessages = (body) => async (dispatch) =>{
   }
 };
 
-
 export const fetchSpecifiedConversation = (conversation) => async (dispatch) => {
   try {
     const { data } = await axios.post("/api/conversations/fetch-single-convo", {conversation});
@@ -161,4 +160,12 @@ export const fetchSpecifiedConversation = (conversation) => async (dispatch) => 
   } catch (error) {
     console.error(error);
   }
+};
+
+export const openConvo = async (body) => {
+  socket.emit("open-convo", {
+    conversation: body.conversation,
+    user:body.user,
+  });
+
 };

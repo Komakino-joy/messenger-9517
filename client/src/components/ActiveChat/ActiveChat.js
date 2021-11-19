@@ -27,10 +27,11 @@ const ActiveChat = (props) => {
   const { user, readMessages } = props;
   const conversation = props.conversation || {};
 
+  
   useEffect(() => {
     readMessages({conversation: props.conversation, user: props.user});
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [props.conversation?.messages.length])
+  }, [props.conversation?.messages.length, ])
 
   return (
     <Box className={classes.root}>
