@@ -80,4 +80,31 @@ router.get("/", async (req, res, next) => {
   }
 });
 
+router.post("/fetch-single-convo", async (req, res, next) => {
+  try {
+    const { conversation } = req.body;
+    
+    if (!req.user) {
+      return res.sendStatus(401);
+    }
+
+    const specifiedConvo = await Conversation.findOne({
+      where: { id: conversation.id },
+      order: [[Message, "createdAt", "ASC"]],
+      attributes: ["id"],
+      include: [
+        { model: Message },
+      ]
+    })
+
+    const specifiedConvoJSON = specifiedConvo.toJSON();
+    specifiedConvoJSON.latestMessageText = conversation.latestMessageText;
+    specifiedConvoJSON.otherUser = conversation.otherUser;
+
+    res.json(specifiedConvoJSON);
+  } catch (error) {
+    next(error);
+  }
+});
+
 module.exports = router;

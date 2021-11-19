@@ -12,6 +12,7 @@ const Message = db.define("message", {
   },
   read: {
     type: Sequelize.BOOLEAN,
+    defaultValue: false,
     allowNull: false,
   },
 });

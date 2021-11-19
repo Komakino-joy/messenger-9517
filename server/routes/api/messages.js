@@ -46,17 +46,22 @@ router.post("/", async (req, res, next) => {
 });
 
 router.put("/read-status", async (req, res, next) => {
-
+  
   try {
-    const { conversation } = req.body;
+    const { conversation, user } = req.body;
 
-    if (!conversation.id) {
+    if (!conversation?.id) {
       return res.sendStatus(404);
     }
 
     if (!req.user) {
       return res.sendStatus(401);
     }
+
+    if(req.user.dataValues.id !== user.id && 
+      req.user.dataValues.id !== conversation.otherUser.id) {
+        return res.sendStatus(403);
+      }
 
     await Message.update({ read: true}, {
       where: {
