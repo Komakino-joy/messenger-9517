@@ -13,9 +13,9 @@ router.get("/", async (req, res, next) => {
     const userId = req.user.id;
     const conversations = await Conversation.findAll({
       where: {
-        [Op.or]: {
+        [Op.in]: {
           user1Id: userId,
-          user2Id: userId,
+          otherUsersIds: userId,
         },
       },
       attributes: ["id"],
